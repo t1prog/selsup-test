@@ -1,6 +1,11 @@
-import React from 'react';
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useState,
+} from 'react';
 
-export type ParamType = 'string' | 'number' | 'select';
+export type ParamType = 'string';
 
 export interface Param {
   id: number;
@@ -32,8 +37,100 @@ export interface State {
   paramValues: Map<number, string>;
 }
 
-export class ParamsEditor extends React.Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-  }
+export interface ParamInputProps {
+  param: Param;
+  value: string;
+  onChange: (value: string) => void;
 }
+
+export const ParamInput: React.FC<ParamInputProps> = ({
+  param,
+  value,
+  onChange,
+}) => {
+  // Как можно расширить
+
+  // if (param.type === 'string' || param.type === 'number') {
+  //   return (
+  //     <input
+  //       type={param.type === 'number' ? 'number' : 'text'}
+  //       value={value}
+  //       onChange={(e) => {
+  //         onChange(e.target.value);
+  //       }}
+  //       placeholder={`Введите ${param.name}`}
+  //       className="param-input"
+  //     />
+  //   );
+  // }
+
+  // Возвращаем по дефолту
+  return (
+    <input
+      type="text"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={`Введите ${param.name}`}
+      className="param-input"
+    />
+  );
+};
+
+export interface ParamEditorHandle {
+  getModel: () => Model;
+}
+
+export const ParamEditor = forwardRef<ParamEditorHandle, Props>(
+  ({ params, model }, ref) => {
+    const [paramValues, setParamValues] = useState<Map<number, string>>(() => {
+      const map = new Map<number, string>();
+      model.paramValues.forEach((pv) => map.set(pv.paramId, pv.value));
+      return map;
+    });
+
+    useEffect(() => {
+      const map = new Map<number, string>();
+      model.paramValues.forEach((pv) => map.set(pv.paramId, pv.value));
+      setParamValues(map);
+    }, [model.paramValues]);
+
+    const handleParamChange = (paramId: number, value: string) => {
+      setParamValues((prev) => {
+        const newMap = new Map(prev);
+        newMap.set(paramId, value);
+        return newMap;
+      });
+    };
+
+    useImperativeHandle(
+      ref,
+      () => ({
+        getModel: () => ({
+          paramValues: Array.from(paramValues.entries()).map(
+            ([paramId, value]) => ({ paramId, value }),
+          ),
+          colors: [...model.colors],
+        }),
+      }),
+      [paramValues, model.colors],
+    );
+
+    return (
+      <div className="param-editor">
+        <h2>Редактор параметров</h2>
+        {params.map((param) => (
+          <div key={param.id} className="param-row">
+            <label className="param-label">
+              {param.name}:
+              <ParamInput
+                param={param}
+                value={paramValues.get(param.id) || ''}
+                onChange={(value) => handleParamChange(param.id, value)}
+              />
+            </label>
+          </div>
+        ))}
+      </div>
+    );
+  },
+);
