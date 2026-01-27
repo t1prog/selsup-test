@@ -1,9 +1,4 @@
-import React, {
-  forwardRef,
-  useEffect,
-  useImperativeHandle,
-  useState,
-} from 'react';
+import React, { forwardRef, useImperativeHandle, useState } from 'react';
 
 export type ParamType = 'string';
 
@@ -88,12 +83,6 @@ export const ParamEditor = forwardRef<ParamEditorHandle, Props>(
       model.paramValues.forEach((pv) => map.set(pv.paramId, pv.value));
       return map;
     });
-
-    useEffect(() => {
-      const map = new Map<number, string>();
-      model.paramValues.forEach((pv) => map.set(pv.paramId, pv.value));
-      setParamValues(map);
-    }, [model.paramValues]);
 
     const handleParamChange = (paramId: number, value: string) => {
       setParamValues((prev) => {
