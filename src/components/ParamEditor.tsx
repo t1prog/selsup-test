@@ -31,6 +31,7 @@ export interface Model {
 export interface Props {
   params: Param[];
   model: Model;
+  onModelChange?: (model: Model) => void;
 }
 
 export interface State {
@@ -81,7 +82,7 @@ export interface ParamEditorHandle {
 }
 
 export const ParamEditor = forwardRef<ParamEditorHandle, Props>(
-  ({ params, model }, ref) => {
+  ({ params, model, onModelChange }, ref) => {
     const [paramValues, setParamValues] = useState<Map<number, string>>(() => {
       const map = new Map<number, string>();
       model.paramValues.forEach((pv) => map.set(pv.paramId, pv.value));
@@ -98,6 +99,17 @@ export const ParamEditor = forwardRef<ParamEditorHandle, Props>(
       setParamValues((prev) => {
         const newMap = new Map(prev);
         newMap.set(paramId, value);
+
+        const newModel: Model = {
+          paramValues: Array.from(newMap.entries()).map(([paramId, value]) => ({
+            paramId,
+            value,
+          })),
+          colors: [...model.colors],
+        };
+
+        onModelChange?.(newModel);
+
         return newMap;
       });
     };

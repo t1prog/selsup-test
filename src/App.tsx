@@ -36,20 +36,12 @@ const App = () => {
 
       <div className="container">
         <section>
-          <ParamEditor params={params} model={model} ref={editorRef} />
-          <button
-            onClick={() => {
-              console.log(editorRef.current);
-
-              if (editorRef.current) {
-                const savedModel = editorRef.current.getModel();
-                console.log('Модель:', savedModel);
-                alert('Модель получена! Проверьте консоль.');
-              }
-            }}
-          >
-            Получить модель
-          </button>
+          <ParamEditor
+            params={params}
+            model={model}
+            onModelChange={setModel}
+            ref={editorRef}
+          />
         </section>
 
         <section className="model-display">
