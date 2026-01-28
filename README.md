@@ -1,3 +1,3 @@
 # pnpm start
 
-![test](public\test_result.png)
+![test](public/test_result.png)
